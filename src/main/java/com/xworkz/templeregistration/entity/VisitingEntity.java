@@ -35,6 +35,8 @@ public class VisitingEntity implements Serializable{
 	private int vId;
 	@Column(name="DATE")
 	private String date;
+	@Column(name = "NO_OF_PEOPLE")
+	private String noOfPeople;
 	@Column(name="SPECIAL_ENTRY")
 	private String seLt;
 	@Column(name="PRASADHA")
@@ -46,8 +48,10 @@ public class VisitingEntity implements Serializable{
 	@Column(name="ID_NUMBER")
 	private String idNumber;
 
-	@OneToOne(cascade = CascadeType.ALL)
-	//@ManyToOne(cascade = CascadeType.ALL)
+	//@JoinColumn(name="P_ID")
+	//@OneToOne(cascade = CascadeType.ALL)
+	
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="P_ID")
 	private PersonalEntity pEntity;
 	
@@ -67,6 +71,14 @@ public class VisitingEntity implements Serializable{
 	}
 	public void setDate(String date) {
 		this.date = date;
+	}
+	
+	public String getNoOfPeople() {
+		return noOfPeople;
+	}
+
+	public void setNoOfPeople(String noOfPeople) {
+		this.noOfPeople = noOfPeople;
 	}
 	public String getSeLt() {
 		return seLt;
@@ -99,6 +111,7 @@ public class VisitingEntity implements Serializable{
 		this.idNumber = idNumber;
 	}
 	
+
 	public PersonalEntity getpEntity() {
 		return pEntity;
 	}
@@ -108,13 +121,9 @@ public class VisitingEntity implements Serializable{
 
 	@Override
 	public String toString() {
-		return "VisitingEntity [vId=" + vId + ", date=" + date + ", seLt=" + seLt + ", prLt=" + prLt + ", ptLt=" + ptLt
-				+ ", idLt=" + idLt + ", idNumber=" + idNumber + "]";
+		return "VisitingEntity [vId=" + vId + ", date=" + date + ", noOfPeople=" + noOfPeople + ", seLt=" + seLt
+				+ ", prLt=" + prLt + ", ptLt=" + ptLt + ", idLt=" + idLt + ", idNumber=" + idNumber + "]";
 	}
-
-	
-
-
 
 
 }

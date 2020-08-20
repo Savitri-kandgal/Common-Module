@@ -1,10 +1,16 @@
 package com.xworkz.templeregistration.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,7 +35,8 @@ import org.apache.log4j.Logger;
 		@NamedQuery(name = "fetchLoginAttemptsByEmail", query = "select pEntity.loginAttempts from PersonalEntity pEntity where emailAddress=:EMAIL_ADDRESS"),
 		@NamedQuery(name = "updateAcctLockByEmail", query = "update PersonalEntity set isAcctLocked=:ACCOUNT_LOCKED where emailAddress=:EMAIL_ADDRESS"),
 		@NamedQuery(name = "fetchAcctLockByEmail", query = "select pEntity.isAcctLocked from PersonalEntity pEntity where emailAddress=:EMAIL_ADDRESS"),
-		@NamedQuery(name = "updateLoginAttemptAndAcctLockbyEmailId", query = "update PersonalEntity set loginAttempts=:LOGIN_ATTEMPTS, isAcctLocked=:ACCOUNT_LOCKED where emailAddress=:EMAIL_ADDRESS")})
+		@NamedQuery(name = "updateLoginAttemptAndAcctLockbyEmailId", query = "update PersonalEntity set loginAttempts=:LOGIN_ATTEMPTS, isAcctLocked=:ACCOUNT_LOCKED where emailAddress=:EMAIL_ADDRESS"),
+		@NamedQuery(name = "fetchPersonalEntitybyEmail", query = "select pEntity from PersonalEntity pEntity where emailAddress=:EMAIL_ADDRESS") })
 public class PersonalEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -50,19 +57,18 @@ public class PersonalEntity implements Serializable {
 	private String phoneNumber;
 	@Column(name = "EMAIL_ADDRESS")
 	private String emailAddress;
-	@Column(name = "NO_OF_PEOPLE")
-	private String noOfPeople;
 	@Column(name = "RANDOM_PASSWORD")
 	private String password;
 	@Column(name = "LOGIN_ATTEMPTS")
 	private int loginAttempts;
 	@Column(name = "ACCOUNT_LOCKED")
 	private boolean isAcctLocked;
+
+	//@JoinColumn(name = "P_ID")
+	// @OneToOne(cascade = CascadeType.ALL)
 	
-	@JoinColumn(name = "P_ID")
-	@OneToOne(cascade = CascadeType.ALL)
-	//@OneToMany(mappedBy = "PersonalEntity", cascade = CascadeType.ALL)
-	private VisitingEntity visitingEntity;
+	@OneToMany(mappedBy = "pEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<VisitingEntity> visitingEntity = new ArrayList<VisitingEntity>();
 
 	public PersonalEntity() {
 		logger.info("LOGGER: " + this.getClass().getSimpleName() + "obj created");
@@ -116,14 +122,6 @@ public class PersonalEntity implements Serializable {
 		this.emailAddress = emailAddress;
 	}
 
-	public String getNoOfPeople() {
-		return noOfPeople;
-	}
-
-	public void setNoOfPeople(String noOfPeople) {
-		this.noOfPeople = noOfPeople;
-	}
-
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
@@ -140,20 +138,20 @@ public class PersonalEntity implements Serializable {
 		this.password = password;
 	}
 
+	public List<VisitingEntity> getVisitingEntity() {
+		return visitingEntity;
+	}
+
+	public void setVisitingEntity(List<VisitingEntity> visitingEntity) {
+		this.visitingEntity = visitingEntity;
+	}
+
 	public int getLoginAttempts() {
 		return loginAttempts;
 	}
 
 	public void setLoginAttempts(int loginAttempts) {
 		this.loginAttempts = loginAttempts;
-	}
-
-	public VisitingEntity getVisitingEntity() {
-		return visitingEntity;
-	}
-
-	public void setVisitingEntity(VisitingEntity visitingEntity) {
-		this.visitingEntity = visitingEntity;
 	}
 
 	public boolean isAcctLocked() {
@@ -167,9 +165,8 @@ public class PersonalEntity implements Serializable {
 	@Override
 	public String toString() {
 		return "PersonalEntity [pId=" + pId + ", name=" + name + ", age=" + age + ", address=" + address
-				+ ", phoneNumber=" + phoneNumber + ", emailAddress=" + emailAddress + ", noOfPeople=" + noOfPeople
-				+ ", password=" + password + ", loginAttempts=" + loginAttempts + ", isAcctLocked=" + isAcctLocked
-				+ "]";
+				+ ", phoneNumber=" + phoneNumber + ", emailAddress=" + emailAddress + ", password=" + password
+				+ ", loginAttempts=" + loginAttempts + ", isAcctLocked=" + isAcctLocked + "]";
 	}
 
 }

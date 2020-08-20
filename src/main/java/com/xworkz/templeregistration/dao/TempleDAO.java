@@ -23,5 +23,7 @@ public interface TempleDAO {
 	public int updateAcctLockByEmailId(String emailId); 
 	public boolean fetchAcctLockByEmail(String emailId);
 	public int updateLoginAttemptAndAcctLockbyEmailId(String emailId);
+	public PersonalEntity fetchPersonalEntitybyEmail(String email);
+	public void saveBooking(VisitingEntity vEntity);
 	}
 

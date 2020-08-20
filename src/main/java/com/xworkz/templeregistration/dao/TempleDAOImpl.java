@@ -154,6 +154,33 @@ public class TempleDAOImpl implements TempleDAO {
 		}
 
 	}
+	
+	@Override
+	public void saveBooking(VisitingEntity vEntity) {
+		logger.info("LOGGER : TempleDAOImpl :---------------- invoking saveBooking()----------------------");
+		Session session = null;
+
+		try {
+			session = this.factory.openSession();
+			logger.info("LOGGER : TempleDAOImpl : session opened");
+			session.beginTransaction();
+			logger.info("LOGGER: TempleDAOImpl : transaction began");
+			logger.info("LOGGER: TempleDAOImpl : saving entity to db");
+			//vEntity.setvId(id);
+			session.save(vEntity);
+			session.getTransaction().commit();
+			logger.info("LOGGER: TempleDAOImpl : entity saved in db");
+		} catch (Exception e) {
+			logger.error("LOGGER: TempleDAOImpl : Failed to save entity into DB");
+			logger.error(e.getMessage(), e);
+
+			session.getTransaction().rollback();
+		} finally {
+			session.close();
+			logger.info("END: TempleDAOImpl :----------------- saveBooking()----------------------");
+		}
+
+	}
 
 	@Override
 	public String fetchPswdByEmailId(String email) {
@@ -377,4 +404,36 @@ public class TempleDAOImpl implements TempleDAO {
 		
 	}
 
+	
+	  @Override 
+	  public PersonalEntity fetchPersonalEntitybyEmail(String email) {
+	  logger.info("LOGGER : TempleDAOImpl :------------------ fetchPidbyEmail() invoked----------------------"); 
+	  Session session = this.factory.openSession();
+	  logger.info("LOGGER : TempleDAOImpl : session opened");
+	  
+	  try { logger.
+	  info("LOGGER : TempleDAOImpl : getting named query from PersonalEntity class"); 
+	  Query query = session.getNamedQuery("fetchPersonalEntitybyEmail");
+	  logger.info("LOGGER : TempleDAOImpl : setting the value to the emailAddress varirable : EMAIL_ADDRESS "); 
+	  query.setParameter("EMAIL_ADDRESS", email); // named parameter
+	  
+	  logger.info("LOGGER : TempleDAOImpl : executing the query"); 
+	  Object result =query.uniqueResult();
+	  logger.info("LOGGER : TempleDAOImpl : got the db result in the form of obj");
+	  PersonalEntity entity = (PersonalEntity) result;
+	  
+	  logger.info("LOGGER : TempleDAOImpl : converted db result to personal enity :" +entity.toString()); 
+	  logger.info("LOGGER : TempleDAOImpl : returning personal enity to service");
+	  return entity;
+	  
+	  } catch (Exception e) {
+		  logger.error(e.getMessage(), e);
+	  } finally {
+	  session.close(); 
+	  logger.info("END: TempleDAOImpl :----------------- fetchPersonalEntitybyEmail()----------------------"); 
+	  }
+	  
+	  return null; }
+
+	
 }

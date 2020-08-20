@@ -1,10 +1,13 @@
 package com.xworkz.templeregistration.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeanUtils;
@@ -31,6 +34,9 @@ public class TempleServiceImpl implements TempleService {
 
 	@Autowired
 	private MailSender mailSender;
+	
+	@Autowired
+	private HttpSession session;
 
 	public TempleServiceImpl() {
 		logger.info("LOGGER : SERVICE:" + this.getClass().getSimpleName() + " created");
@@ -128,18 +134,19 @@ public class TempleServiceImpl implements TempleService {
 					logger.info("LOGGER : emailAddress is invalid :" + dto.getEmailAddress());
 					valid = 1;
 				}
-				if (valid == 0 && dto.getNoOfPeople() != null && !dto.getNoOfPeople().isEmpty()) {
-					logger.info("LOGGER : noOfPeople is valid :" + dto.getNoOfPeople());
-					valid = 0;
-				} else {
-					logger.info("LOGGER : noOfPeople is invalid :" + dto.getNoOfPeople());
-					valid = 1;
-				}
+
 				if (valid == 0 && dto.getDate() != null && !dto.getDate().isEmpty()) {
 					logger.info("LOGGER : date is valid :" + dto.getDate());
 					valid = 0;
 				} else {
 					logger.info("LOGGER : date is invalid :" + dto.getDate());
+					valid = 1;
+				}
+				if (valid == 0 && dto.getNoOfPeople() != null && !dto.getNoOfPeople().isEmpty()) {
+					logger.info("LOGGER : noOfPeople is valid :" + dto.getNoOfPeople());
+					valid = 0;
+				} else {
+					logger.info("LOGGER : noOfPeople is invalid :" + dto.getNoOfPeople());
 					valid = 1;
 				}
 				if (valid == 0 && dto.getSeLt() != null && !dto.getSeLt().isEmpty()) {
@@ -317,7 +324,15 @@ public class TempleServiceImpl implements TempleService {
 				if (Objects.nonNull(entity)) {
 					logger.info("LOGGER : entity is valid");
 					dto = new RegisterDTO();
+
+					int pId = entity.getpEntity().getpId();
+					// String emailid=entity.getpEntity().getEmailAddress();
+
+					logger.info("LOGGER :----------- pId from validateAndFetchDetailsByEmail:" + pId + "-------------");
+					// logger.info("LOGGER :----------- emailid from
+					// validateAndFetchDetailsByEmail:" + emailid+"-------------");
 					BeanUtils.copyProperties(entity, dto);
+
 					logger.info("LOGGER : converted VisitingEntity to RegisterDTO :" + dto.toString());
 				}
 				logger.info(
@@ -350,7 +365,7 @@ public class TempleServiceImpl implements TempleService {
 					if (dbPswd.isEmpty()) {
 						logger.info("LOGGER : ramdom password is not exist in the database, can generate pswd");
 						status = 0;
-						int pswdLength =10;
+						int pswdLength = 10;
 						char[] password = generatingRandomPassword(pswdLength);
 						String Pswd = String.valueOf(password);
 						logger.info("LOGGER : generated random password :" + Pswd);
@@ -400,8 +415,7 @@ public class TempleServiceImpl implements TempleService {
 				logger.info("LOGGER : sendMail() ends");
 				logger.info("LOGGER : ----------------ENDS :sendingPswdEmail()--------------------");
 				return status;
-			} 
-			else {
+			} else {
 				logger.warn("LOGGER : Email id or password id is invalid");
 				return status;
 			}
@@ -438,7 +452,7 @@ public class TempleServiceImpl implements TempleService {
 	}
 
 	@Override
-	public Object validateAndLogin(String email, String password) {
+	public String validateAndLogin(String email, String password) {
 		logger.info("LOGGER : ----------------STARTS :validateAndLogin()--------------------");
 		String decPswd = null;
 		try {
@@ -465,7 +479,7 @@ public class TempleServiceImpl implements TempleService {
 								logger.info("LOGGER : fetched dto bases on email and pwsd :" + dto.toString());
 								logger.info("LOGGER : returning dto");
 								logger.info("LOGGER : ----------------ENDS :validateAndLogin()--------------------");
-								return dto;
+								return email;
 
 							} else {
 								logger.info(
@@ -574,10 +588,12 @@ public class TempleServiceImpl implements TempleService {
 						int pswdSaveStatus = dao.savingPasswordByEmail(email, encript);
 						logger.info("LOGGER : Password saved status :" + pswdSaveStatus);
 						int update = dao.updateLoginAttemptAndAcctLockbyEmailId(email);
-						logger.info("LOGGER : updated LoginAttempt And AcctLockbyEmailId fields for default values :0 and false");
+						logger.info(
+								"LOGGER : updated LoginAttempt And AcctLockbyEmailId fields for default values :0 and false");
 						logger.info("LOGGER : calling sendingResetPswdEmail() to send mail");
 						sendingResetPswdEmail(email, Pswd);
-						logger.info("LOGGER : ----------------ENDS :validateAndupdateResetPasswordByEmail()--------------------");
+						logger.info(
+								"LOGGER : ----------------ENDS :validateAndupdateResetPasswordByEmail()--------------------");
 						return status;
 					}
 				} else {
@@ -624,6 +640,153 @@ public class TempleServiceImpl implements TempleService {
 			logger.error("LOGGER : Some thing went wrong in Service", e);
 		}
 		logger.info("LOGGER : ----------------ENDS :sendingPswdEmail()--------------------");
+		return 0;
+	}
+
+	@Override
+	public int validateAndBookVisit(RegisterDTO dto) {
+		logger.info("LOGGER : SERVICE:------------STARTS : validateAndBookVisit()-------------------------------");
+		int valid = 1;
+		try {
+			if (Objects.nonNull(dto)) {
+				logger.info("starting to validate fields");
+
+				if (dto.getDate() != null && !dto.getDate().isEmpty()) {
+					logger.info("LOGGER : date is valid :" + dto.getDate());
+					valid = 0;
+				} else {
+					logger.info("LOGGER : date is invalid :" + dto.getDate());
+					valid = 1;
+				}
+				if (valid == 0 && dto.getNoOfPeople() != null && !dto.getNoOfPeople().isEmpty()) {
+					logger.info("LOGGER : noOfPeople is valid :" + dto.getNoOfPeople());
+					valid = 0;
+				} else {
+					logger.info("LOGGER : noOfPeople is invalid :" + dto.getNoOfPeople());
+					valid = 1;
+				}
+				if (valid == 0 && dto.getSeLt() != null && !dto.getSeLt().isEmpty()) {
+					logger.info("LOGGER : SE type is valid :" + dto.getSeLt());
+					valid = 0;
+				} else {
+					logger.info("LOGGER :  SE type is invalid :" + dto.getSeLt());
+					valid = 1;
+				}
+				if (valid == 0 && dto.getPrLt() != null && !dto.getPrLt().isEmpty()) {
+					logger.info("LOGGER : prashada type is valid :" + dto.getPrLt());
+					valid = 0;
+				} else {
+					logger.info("LOGGER : prashada type is invalid :" + dto.getPrLt());
+					valid = 1;
+				}
+				if (valid == 0 && dto.getPtLt() != null && !dto.getPtLt().isEmpty()) {
+					logger.info("LOGGER : pooja type is valid :" + dto.getPtLt());
+					valid = 0;
+				} else {
+					logger.info("LOGGER : pooja type is invalid :" + dto.getPtLt());
+					valid = 1;
+				}
+				if (valid == 0 && dto.getIdLt() != null && !dto.getIdLt().isEmpty()) {
+					logger.info("LOGGER : id type is valid :" + dto.getIdLt());
+					valid = 0;
+				} else {
+					logger.info("LOGGER : id type is invalid :" + dto.getIdLt());
+					valid = 1;
+				}
+
+			}
+			String emailId =(String) session.getAttribute("EMAILID");
+			logger.info("LOGGER :---- getting email id from the session.getAttribute(\"email\") :"+emailId+"-------------");
+			logger.info("LOGGER : calling dao.fetchCountByEmail() to fetching the count of email address");
+			logger.info("LOGGER : Checking if all fields are entered");
+			if (valid == 0) {
+				logger.info("LOGGER : informations are valid :" + valid);
+					logger.info("LOGGER :can pass dto to DAO ");
+
+					PersonalEntity pEntity = new PersonalEntity();
+					VisitingEntity vEntity = new VisitingEntity();
+					
+					logger.info("LOGGER : before copying data from dto to visiting entity :" + vEntity);
+					logger.info("LOGGER : copying data from dto to visiting entity");
+					BeanUtils.copyProperties(dto, vEntity); 
+					logger.info("LOGGER : after copying data from dto to visiting entity :" + vEntity); 
+					logger.info("LOGGER: fetching PersonalEntity from db");
+					pEntity =dao.fetchPersonalEntitybyEmail(emailId);	
+					logger.info("LOGGER :------- Personal entity is :" + pEntity.toString()+"------------"); 
+					logger.info("LOGGER: passing the pEntity to the setpEntity()");
+					vEntity.setpEntity(pEntity);
+					
+					logger.info("LOGGER : calling create() to save vEntity");
+					dao.saveBooking(vEntity); 
+					logger.info("LOGGER : sending booking details to the user mail"); //
+					sendBookingInfoEmail(emailId, dto);
+					logger.info(
+							"LOGGER : SERVICE:------------ENDS : validateAndBookVisit()-------------------------------");
+					return 0;
+			} else {
+				logger.info("LOGGER : fields are missing, please enter the missing fields");
+				return 1;
+			}
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		logger.info("LOGGER : SERVICE:------------ENDS : validateAndBookVisit()-------------------------------");
+		return valid;
+
+	}
+
+	@Override
+	public int sendBookingInfoEmail(String toMail, RegisterDTO dto) {
+		logger.info("LOGGER : SERVICE:-------------------STARTS : sendBookingInfoEmail()----------------------");
+		int status = 1;
+		try {
+			if (Objects.nonNull(dto)) {
+				status = 0;
+				logger.info("dto object is  not null");
+				if (Objects.nonNull(toMail) && !toMail.isEmpty() && status == 0) {
+					status = 0;
+					logger.info("Email id is valid");
+				} else {
+					status = 1;
+					logger.warn("Email id is invalid");
+				}
+
+			} else {
+				status = 1;
+				logger.warn("dto object is null");
+			}
+
+			if (status == 0) {
+				SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+				simpleMailMessage.setTo(toMail);
+				StringBuilder str = new StringBuilder();
+				str.append("Congratulation, Temple Visit Booking successful \r\n");
+				str.append("\r\n");
+				str.append("Visiting date :" + dto.getDate() + "\r\n");
+				str.append("No. Of People :" + dto.getNoOfPeople() + "\r\n");
+				str.append("Special Entry :" + dto.getSeLt() + "\r\n");
+				str.append("Pooja Type 	  :" + dto.getPtLt() + "\r\n");
+				str.append("Prasadha 	  :" + dto.getPrLt() + "\r\n");
+				str.append("ID card 	  :" + dto.getIdLt() + "\r\n");
+				str.append("ID number     :" + dto.getIdNumber() + "\r\n");
+				simpleMailMessage.setText(str.toString());
+				simpleMailMessage.setSubject("Temple Visit Booking Successfull");
+
+				logger.info("sending an email :");
+				mailSender.send(simpleMailMessage);
+				logger.info("sent an email :");
+				logger.info("End : sendMail()");
+				logger.info("LOGGER : SERVICE:-------------------ENDS : sendBookingInfoEmail()----------------------");
+				return status;
+
+			} else {
+				return status;
+			}
+		} catch (Exception e) {
+			logger.error("Some thing went wrong in Service", e);
+		}
+		logger.info("LOGGER : SERVICE:-------------------ENDS : sendBookingInfoEmail()----------------------");
 		return 0;
 	}
 

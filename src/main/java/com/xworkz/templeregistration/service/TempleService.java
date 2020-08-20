@@ -16,10 +16,12 @@ public interface TempleService {
 	public RegisterDTO validateAndFetchDetailsByEmail(String email);
 	public int validateAndSavingPasswordByEmail(String email);
 	public int sendingPswdEmail(String toMail, String password);
-	public Object validateAndLogin(String email, String password);
+	public String validateAndLogin(String email, String password);
 	public boolean validateAndAcctLockByEmailId(String email, String password);
 	public int validateAndResetPasswordByEmail(String email);
 	public boolean checkEmailAndPswdFields(String email, String password);
 	public int sendingResetPswdEmail(String toMail, String password);
+	public int validateAndBookVisit(RegisterDTO dto);
+	public int sendBookingInfoEmail(String toMail, RegisterDTO dto);
 }
 

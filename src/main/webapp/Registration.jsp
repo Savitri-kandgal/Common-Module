@@ -22,7 +22,8 @@
 	<nav class="navbar navbar-inverse">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<p class="navbar-text" style="color:white; font-size:20px;">Temple Registration</p>
+				<p class="navbar-text" style="color: white; font-size: 20px;">Temple
+					Registration</p>
 			</div>
 			<ul class="nav navbar-nav navbar-right">
 				<li><a href="index.jsp"><span
@@ -31,7 +32,7 @@
 			</ul>
 		</div>
 	</nav>
-	
+
 	<br>
 	<form action="register.do" method="post">
 		<div class="container">
@@ -68,11 +69,6 @@
 						</td>
 					</tr>
 
-					<tr>
-						<td><label>No Of People :</label></td>
-						<td><input type="text" name="noOfPeople" class="form-control"
-							id="people" placeholder="Enter No Of People"></td>
-					</tr>
 				</tbody>
 			</table>
 
@@ -81,11 +77,19 @@
 			</h3>
 			<table class="table table-hover">
 				<tbody class="form-inline">
+
 					<tr>
 						<td><label>Date :</label> <input type="text" name="date"
 							class="form-control" id="date" placeholder="Enter date">
 						</td>
 
+						<td>
+						
+						<td><label>No Of People :</label>
+						<input type="text" name="noOfPeople" class="form-control"
+							id="people" placeholder="Enter No Of People"></td>
+					</tr>
+					<tr>
 						<td><label>Special Entrance :</label> <select name="seLt"
 							class="form-control">
 								<option>--select--</option>
@@ -93,8 +97,7 @@
 									<option value="${sedata.propValue}">${sedata.propName}</option>
 								</c:forEach>
 						</select></td>
-					</tr>
-					<tr>
+
 						<td><label>Prasadha </label> <select name="prLt"
 							class="form-control">
 								<option>--select--</option>
@@ -102,7 +105,9 @@
 									<option value="${prdata.propValue}">${prdata.propName}</option>
 								</c:forEach>
 						</select></td>
-
+					</tr>
+					
+					<tr>
 						<td><label>Pooja Type :</label> <select name="ptLt"
 							class="form-control">
 								<option>--select--</option>
@@ -110,8 +115,7 @@
 									<option value="${ptdata.propValue}">${ptdata.propName}</option>
 								</c:forEach>
 						</select></td>
-					</tr>
-					<tr>
+
 						<td><label>ID Card :</label> <select name="idLt"
 							class="form-control">
 								<option>--select--</option>
@@ -119,11 +123,13 @@
 									<option value="${iddata.propValue}">${iddata.propName}</option>
 								</c:forEach>
 						</select></td>
-
+					</tr>
+					<tr>
 						<td><label>ID Number :</label> <input type="text"
 							name="idNumber" class="form-control" id="id"
 							placeholder="Enter ID number"></td>
 					</tr>
+
 
 				</tbody>
 			</table>
@@ -137,8 +143,8 @@
 
 	</form>
 	${error}
-	</body>
+</body>
 
-	
+
 
 </html>

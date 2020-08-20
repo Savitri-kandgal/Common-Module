@@ -3,12 +3,12 @@ package com.xworkz.templeregistration.Controller;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,7 +17,6 @@ import com.xworkz.templeregistration.dao.TempleDAOImpl;
 import com.xworkz.templeregistration.dto.PropDTO;
 import com.xworkz.templeregistration.dto.RegisterDTO;
 import com.xworkz.templeregistration.service.TempleService;
-import com.xworkz.templeregistration.service.TempleServiceImpl;
 
 @Controller
 @RequestMapping("/")
@@ -29,8 +28,8 @@ public class TempleController {
 	private List<PropDTO> idList;
 	private List<PropDTO> ptList;
 	private List<PropDTO> prList;
-	private int count = 0;
 	private int attempts = 3;
+	
 	@Autowired
 	private TempleService service;
 
@@ -86,7 +85,7 @@ public class TempleController {
 			int status = this.service.validateAndCreate(dto);
 
 			logger.info(
-					"LOGGER : CONTROLLER :printing status from controller afte executing service.validateAndCreate(dto) :"
+					"LOGGER : CONTROLLER :printing status from controller after executing service.validateAndCreate(dto) :"
 							+ status);
 			if (status == 0) {
 				logger.info("LOGGER : CONTROLLER :saving data to RegSuccess page");
@@ -110,7 +109,7 @@ public class TempleController {
 
 	}
 
-	@RequestMapping(value = "/resendingmail", method = RequestMethod.POST)
+	@RequestMapping(value = "/resendingmail.do", method = RequestMethod.POST)
 	public String onResendingMail(@RequestParam String email, Model model) {
 		logger.info("LOGGER : CONTROLLER :-------------STARTS : onResendingMail()--------------------");
 		try {
@@ -143,8 +142,7 @@ public class TempleController {
 				logger.info("LOGGER : CONTROLLER :-------------ENDS : onGeneratePassword()--------------------");
 				return "PasswordStatus";
 			} else {
-				model.addAttribute("error",
-						"Not first time login, Kindly login with password or reset the password");
+				model.addAttribute("error", "Not first time login, Kindly login with password or reset the password");
 				logger.info("LOGGER : CONTROLLER :-------------ENDS : onGeneratePassword()--------------------");
 				return "PasswordStatus";
 			} // model.addAttribute("error", "Email id is invalid, Please enter the correct
@@ -158,7 +156,7 @@ public class TempleController {
 	}
 
 	@RequestMapping(value = "/login.do", method = RequestMethod.POST)
-	public String onLogin(@RequestParam String email, @RequestParam String pswd, Model model) {
+	public String onLogin(@RequestParam String email, @RequestParam String pswd, HttpSession session, Model model) {
 		logger.info("LOGGER : CONTROLLER :-------------STARTS : onLogin()--------------------");
 
 		try {
@@ -166,7 +164,7 @@ public class TempleController {
 			if (status != true) {
 				Object dto = service.validateAndLogin(email, pswd);
 				if (dto != null) {
-
+					session.setAttribute("EMAILID", email);
 					logger.info("LOGGER : CONTROLLER :saving data to RegSuccess page");
 
 					model.addAttribute("dto", dto);
@@ -227,27 +225,64 @@ public class TempleController {
 		logger.info("LOGGER : CONTROLLER :-------------ENDS : onResettingPassword()--------------------");
 		return email;
 	}
-	
-	/*
-	 * @RequestMapping(value = "/loadingforbook.do", method = RequestMethod.GET)
-	 * public String onLoadingForBook(Model model) { try { logger.
-	 * info("LOGGER : CONTROLLER :-------------STARTS : onLoading()--------------------"
-	 * );
-	 * 
-	 * model.addAttribute("seLt", seList); logger.info(
-	 * "LOGGER : CONTROLLER : onLoading() seList sending to Special Entrance field of registration page :"
-	 * + seList); model.addAttribute("idLt", idList); logger.
-	 * info("LOGGER : CONTROLLER : onLoading() idList sending to Id Card field of registration page :"
-	 * + idList); model.addAttribute("ptLt", ptList); logger.
-	 * info("LOGGER : CONTROLLER : onLoading() ptList sending to pooja type field of registration page :"
-	 * + ptList); model.addAttribute("prLt", prList); logger.
-	 * info("LOGGER : CONTROLLER : onLoading() prList sending to Prasadha field of registration page :"
-	 * + prList);
-	 * 
-	 * } catch (Exception e) { logger.error(e.getMessage(), e); }
-	 * logger.info("LOGGER : CONTROLLER : returning to the Registration page");
-	 * logger.
-	 * info("LOGGER : CONTROLLER :-------------ENDS : onLoading()--------------------"
-	 * ); return "Booking"; }
-	 */
+
+	@RequestMapping(value = "/loadingforbook.do", method = RequestMethod.GET)
+	public String onLoadingForBook(Model model) {
+		try {
+			logger.info("LOGGER : CONTROLLER :-------------STARTS : onLoading()--------------------");
+
+			model.addAttribute("seLt", seList);
+			logger.info(
+					"LOGGER : CONTROLLER : onLoading() seList sending to Special Entrance field of registration page :"
+							+ seList);
+			model.addAttribute("idLt", idList);
+			logger.info("LOGGER : CONTROLLER : onLoading() idList sending to Id Card field of registration page :"
+					+ idList);
+			model.addAttribute("ptLt", ptList);
+			logger.info("LOGGER : CONTROLLER : onLoading() ptList sending to pooja type field of registration page :"
+					+ ptList);
+			model.addAttribute("prLt", prList);
+			logger.info("LOGGER : CONTROLLER : onLoading() prList sending to Prasadha field of registration page :"
+					+ prList);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		logger.info("LOGGER : CONTROLLER : returning to the Registration page");
+		logger.info("LOGGER : CONTROLLER :-------------ENDS : onLoading()--------------------");
+		return "Booking";
+	}
+
+	@RequestMapping(value = "/bookingVisit.do", method = RequestMethod.POST)
+	public String onBookingVisit(RegisterDTO dto, Model model) {
+		logger.info("LOGGER : CONTROLLER :-------------STARTS : onBookingVisit()--------------------");
+		logger.info("LOGGER : CONTROLLER :printing dto");
+		logger.info(dto);
+		try {
+			logger.info("LOGGER : CONTROLLER :calling service.validateAndCreate()");
+			int status = this.service.validateAndBookVisit(dto);
+
+			logger.info(
+					"LOGGER : CONTROLLER :printing status from controller after executing service.validateAndBookVisit(dto) :"
+							+ status);
+			if (status == 0) {
+				logger.info("LOGGER : CONTROLLER :saving data to bookingSuccess.jsp page");
+
+				model.addAttribute("dto", dto);
+				logger.info("LOGGER : CONTROLLER :-------------ENDS : onBookingVisit()--------------------");
+				return "bookingSuccess";
+			} else {
+				logger.info("LOGGER : CONTROLLER :Fields are missing, Please enter valid details");
+				logger.info("LOGGER : CONTROLLER :-------------ENDS : onBookingVisit()--------------------");
+				return "error";
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			model.addAttribute("error", "Please enter missing fields");
+
+		}
+		logger.info("LOGGER : CONTROLLER :-------------ENDS : onBookingVisit()--------------------");
+		return "bookingSuccess";
+
+	}
+
 }
